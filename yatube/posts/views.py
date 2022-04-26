@@ -1,5 +1,3 @@
-from xml.etree.ElementTree import Comment
-
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -104,7 +102,7 @@ def add_comment(request, post_id):
 def follow_index(request):
     following = request.user.follower.values_list('author', flat=True)
     context = get_page_context(Post.objects.filter(author__id__in=following),
-                                    request)
+                               request)
     return render(request, 'posts/follow.html', context)
 
 
@@ -113,7 +111,8 @@ def profile_follow(request, username):
     author = get_object_or_404(User, username=username)
     following = Follow.objects.filter(author=author, user=request.user).exists()
     if request.user != author and not following:
-        follow = Follow.objects.create(user=request.user, author=author)
+        follow = Follow.objects.create(user=request.user,
+                                       author=author)
         follow.save()
     return redirect('all_posts:profile', username=username)
 
@@ -124,4 +123,5 @@ def profile_unfollow(request, username):
             user=request.user,
             author__username=username
     ).delete()
-    return redirect('all_posts:profile', username=username)
+    return redirect('all_posts:profile',
+                    username=username)
