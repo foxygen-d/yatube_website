@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Последние обновления на сайте{% endblock %}
+{% block title %}Подписки автора {{ request.user.get_full_name }}{% endblock %}
 
 {% block content %}
 <div class="container py-5">

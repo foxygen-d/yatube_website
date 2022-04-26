@@ -1,10 +1,11 @@
 from xml.etree.ElementTree import Comment
+
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
-from .forms import PostForm, CommentForm
-from .models import Group, Post, Comment, User
+from .forms import CommentForm, PostForm
+from .models import Follow, Group, Post, User
 from .utils import get_page_context
 
 
@@ -36,7 +37,7 @@ def profile(request, username):
 
 def post_detail(request, post_id):
     post_item = get_object_or_404(Post, id=post_id)
-    comments = get_object_or_404(Comment, id=post_id)
+    comments = post_item.comments.all()
     comment_form = CommentForm(request.POST or None)
     context = {
         'post_item': post_item,
@@ -81,11 +82,46 @@ def post_edit(request, post_id):
     }
     return render(request, 'posts/create_post.html', context)
 
+
 @login_required
 def add_comment(request, post_id):
+    post = get_object_or_404(Post, pk=post_id)
     form = CommentForm(request.POST or None)
     if form.is_valid():
         comment = form.save(commit=False)
         comment.author = request.user
+        comment.post = post
         comment.save()
-    return redirect('posts:post_detail', post_id=post_id) 
+        return redirect('all_posts:post_detail', post_id=post_id)
+    context = {
+        'form': form,
+        'post': post,
+    }
+    return render(request, 'posts/post_detail.html', context)
+
+
+@login_required
+def follow_index(request):
+    following = request.user.follower.values_list('author', flat=True)
+    context = get_page_context(Post.objects.filter(author__id__in=following),
+                                    request)
+    return render(request, 'posts/follow.html', context)
+
+
+@login_required
+def profile_follow(request, username):
+    author = get_object_or_404(User, username=username)
+    following = Follow.objects.filter(author=author, user=request.user).exists()
+    if request.user != author and not following:
+        follow = Follow.objects.create(user=request.user, author=author)
+        follow.save()
+    return redirect('all_posts:profile', username=username)
+
+
+@login_required
+def profile_unfollow(request, username):
+    Follow.objects.select_related('user').filter(
+            user=request.user,
+            author__username=username
+    ).delete()
+    return redirect('all_posts:profile', username=username)

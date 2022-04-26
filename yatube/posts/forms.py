@@ -1,6 +1,6 @@
 from django import forms
 
-from .models import Post, Comment
+from .models import Comment, Post
 
 
 class PostForm(forms.ModelForm):
@@ -21,5 +21,5 @@ class CommentForm(forms.ModelForm):
             'text': 'Текст',
         }
         help_texts = {
-            'text': 'Текст нового комментария',
+            'text': 'Новый комментарий',
         }

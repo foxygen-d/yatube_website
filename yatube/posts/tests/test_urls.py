@@ -38,6 +38,7 @@ class PostsURLTests(TestCase):
             f'/group/{self.group.slug}/': 'posts/group_list.html',
             f'/profile/{self.user}/': 'posts/profile.html',
             f'/posts/{self.post.pk}/': 'posts/post_detail.html',
+            '/unexisting_page/': 'core/404.html',
         }
         for url, template in templates_url_names_for_guest.items():
             with self.subTest(url=url):
@@ -48,6 +49,7 @@ class PostsURLTests(TestCase):
         """URL-адрес использует соответствующий шаблон."""
         templates_url_names_for_authorized = {
             '/create/': 'posts/create_post.html',
+            '/follow/': 'posts/follow.html',
         }
         for url, template in templates_url_names_for_authorized.items():
             with self.subTest(url=url):
@@ -87,6 +89,9 @@ class PostsURLTests(TestCase):
             '/create/': HTTPStatus.FOUND,
             f'/posts/{self.post.pk}/edit/': HTTPStatus.FOUND,
             '/unexisting_page/': HTTPStatus.NOT_FOUND,
+            '/follow/': HTTPStatus.FOUND,
+            '/profile/<str:username>/follow/': HTTPStatus.FOUND,
+            '/profile/<str:username>/unfollow/': HTTPStatus.FOUND,
         }
 
         for url, status_code in url_codes_for_guest.items():
@@ -104,6 +109,9 @@ class PostsURLTests(TestCase):
             '/create/': HTTPStatus.OK,
             f'/posts/{self.post.pk}/edit/': HTTPStatus.OK,
             '/unexisting_page/': HTTPStatus.NOT_FOUND,
+            '/follow/': HTTPStatus.OK,
+            '/profile/<str:username>/follow/': HTTPStatus.NOT_FOUND,
+            '/profile/<str:username>/unfollow/': HTTPStatus.FOUND,
         }
 
         for url, status_code in url_codes_for_guest.items():

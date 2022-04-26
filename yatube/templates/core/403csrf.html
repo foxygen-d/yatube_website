@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h1>Custom CSRF check error. 403</h1>
+  <a href="{% url 'all_posts:index' %}">Идите на главную</a>
+{% endblock %}

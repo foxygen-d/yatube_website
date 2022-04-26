@@ -34,6 +34,14 @@ class PostsPagesTests(TestCase):
                 text=f'Тестовый пост {i}',
                 group=cls.group,
             )
+        cls.image = (            
+             b'\x47\x49\x46\x38\x39\x61\x02\x00'
+             b'\x01\x00\x80\x00\x00\x00\x00\x00'
+             b'\xFF\xFF\xFF\x21\xF9\x04\x00\x00'
+             b'\x00\x00\x00\x2C\x00\x00\x00\x00'
+             b'\x02\x00\x01\x00\x00\x02\x02\x0C'
+             b'\x0A\x00\x3B'
+        )
 
     @classmethod
     def tearDownClass(cls):
@@ -60,6 +68,7 @@ class PostsPagesTests(TestCase):
             reverse(
                 'all_posts:post_edit',
                 kwargs={'post_id': self.post.pk}): 'posts/create_post.html',
+            reverse('all_posts:follow_index'): 'posts/follow.html',
         }
         for reverse_name, template in templates_page_names.items():
             with self.subTest(reverse_name=reverse_name):
@@ -101,6 +110,7 @@ class PostsPagesTests(TestCase):
         self.assertEqual(object.text,
                          self.post.text[:30])
         self.assertEqual(response.context['post_count'], self.POST_COUNT)
+
 
     def test_post_create_show_correct_context(self):
         """Шаблон post_create сформирован с правильным контекстом."""

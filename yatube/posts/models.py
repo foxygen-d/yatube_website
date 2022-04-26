@@ -1,10 +1,9 @@
-from cgitb import text
+from core.models import CreatedModel
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.urls import reverse
 
 from .validators import validate_not_empty
-from core.models import CreatedModel
 
 
 User = get_user_model()
@@ -65,19 +64,38 @@ class Post(CreatedModel):
 class Comment(models.Model):
     post = models.ForeignKey(
         Post,
+        on_delete=models.CASCADE,
+        related_name='comments',        
+    )
+    author = models.ForeignKey(
+        User,
         on_delete=models.SET_NULL,
         related_name='comments',
-        blank=True,
+        verbose_name='Автор',
         null=True,
+    )
+    text = models.TextField('Текст', help_text='Новый комментарий')
+    created = models.DateTimeField(
+        verbose_name='Дата комментария к посту',
+        auto_now_add=True
+    )
+
+    class Meta:
+        ordering = ['-created']
+
+    def __str__(self):
+        return f"Запись: '{self.post}', автор: '{self.author}'"
+
+
+class Follow(models.Model):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='follower',
     )
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='comments',
+        related_name='following',
         verbose_name='Автор',
-    )
-    text = models.TextField('Текст', help_text='Текст нового комментария')
-    created = models.DateTimeField(
-        verbose_name='Дата комментария к посту',
-        auto_now_add=True
     )
