@@ -2,6 +2,7 @@ from http import HTTPStatus
 
 from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
+
 from posts.models import Group, Post
 
 
@@ -50,6 +51,7 @@ class PostsURLTests(TestCase):
         templates_url_names_for_authorized = {
             '/create/': 'posts/create_post.html',
             '/follow/': 'posts/follow.html',
+            '/posts/37/edit/': 'core/404.html',
         }
         for url, template in templates_url_names_for_authorized.items():
             with self.subTest(url=url):

@@ -1,8 +1,8 @@
 import shutil
 import tempfile
 
-from django.contrib.auth import get_user_model
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
@@ -71,6 +71,7 @@ class PostsFormTests(TestCase):
             follow=True
         )
         post_1 = Post.objects.latest('pub_date')
+        post_1.image = uploaded
         self.assertRedirects(response,
                              reverse('all_posts:profile',
                                      kwargs={'username': self.user}))
@@ -78,12 +79,7 @@ class PostsFormTests(TestCase):
         self.assertEqual(post_1.text, form_data['text'])
         self.assertEqual(post_1.author, self.user)
         self.assertEqual(post_1.group.title, self.group.title)
-        self.assertTrue(
-            Post.objects.filter(
-                text=post_1.text,
-                image=post_1.image
-            ).exists()
-        )
+        self.assertEqual(post_1.image, form_data['image'])
 
     def test_author_post_edit(self):
         """Валидная форма редактирует запись в Post."""

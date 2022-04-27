@@ -62,7 +62,7 @@ def post_create(request):
 def post_edit(request, post_id):
     post = get_object_or_404(Post, pk=post_id)
     if request.user != post.author:
-        return HttpResponse('Вы не можете редактировать этот пост')
+        return render(request, 'core/403csrf.html')
 
     is_edit = True
     form = PostForm(
