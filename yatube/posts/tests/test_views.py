@@ -138,7 +138,8 @@ class PostsPagesTests(TestCase):
     def test_follow_on_author(self):
         """Новая запись пользователя не видна тем,
         кто на него не подписан."""
-        response = self.authorized_client.get(reverse('all_posts:follow_index'))
+        response = self.authorized_client.get(
+            reverse('all_posts:follow_index'))
         self.assertEqual(len(response.context['page_obj']), 0)
 
     def test_authorized_follows(self):
