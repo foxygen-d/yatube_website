@@ -147,7 +147,7 @@ class PostsPagesTests(TestCase):
         пользователей."""
         self.author_client.get(
             reverse('all_posts:profile_follow',
-                    kwargs={'username': self.author}))
+                    kwargs={'username': self.user}))
         self.assertEqual(Follow.objects.all().count(), 1)
 
     def test_authorized_unfollows(self):
