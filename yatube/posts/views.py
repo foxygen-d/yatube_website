@@ -10,7 +10,9 @@ def index(request):
     context = {
         'index': True,
     }
-    context.update(get_page_context(Post.objects.select_related('author').all(), request))
+    context.update(get_page_context(
+        Post.objects.select_related('author').all(),
+        request))
     return render(request, 'posts/index.html', context)
 
 
@@ -111,16 +113,17 @@ def follow_index(request):
     context = {
         'follow': True,
     }
-    context.update(get_page_context(Post.objects.filter(author__id__in=following),
-                                    request))
+    context.update(get_page_context(
+        Post.objects.filter(author__id__in=following),
+        request))
     return render(request, 'posts/follow.html', context)
 
 
 @login_required
 def profile_follow(request, username):
     author = get_object_or_404(User, username=username)
-    following = Follow.objects.filter(author=author,
-                                      user=request.user).exists()
+    Follow.objects.filter(author=author,
+                          user=request.user).exists()
     Follow.objects.get_or_create(user=request.user,
                                  author=author)
     return redirect('all_posts:profile', username=username)
