@@ -7,7 +7,10 @@ from .utils import get_page_context
 
 
 def index(request):
-    context = get_page_context(Post.objects.all(), request)
+    context = {
+        'index': True,
+    }
+    context.update(get_page_context(Post.objects.select_related('author').all(), request))
     return render(request, 'posts/index.html', context)
 
 
@@ -23,9 +26,14 @@ def group_posts(request, slug):
 
 
 def profile(request, username):
+    following = False
     author = get_object_or_404(User, username=username)
+    if request.user.is_authenticated:
+        follows = User.objects.filter(following__user=request.user)
+        following = bool(author in follows)
     context = {
         'author': author,
+        'following': following,
     }
     context.update(get_page_context(Post.objects.filter(author=author),
                                     request))
@@ -100,8 +108,11 @@ def add_comment(request, post_id):
 @login_required
 def follow_index(request):
     following = request.user.follower.values_list('author', flat=True)
-    context = get_page_context(Post.objects.filter(author__id__in=following),
-                               request)
+    context = {
+        'follow': True,
+    }
+    context.update(get_page_context(Post.objects.filter(author__id__in=following),
+                                    request))
     return render(request, 'posts/follow.html', context)
 
 
@@ -110,10 +121,8 @@ def profile_follow(request, username):
     author = get_object_or_404(User, username=username)
     following = Follow.objects.filter(author=author,
                                       user=request.user).exists()
-    if request.user != author and not following:
-        follow = Follow.objects.create(user=request.user,
-                                       author=author)
-        follow.save()
+    Follow.objects.get_or_create(user=request.user,
+                                 author=author)
     return redirect('all_posts:profile', username=username)
 
 

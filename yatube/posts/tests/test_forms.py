@@ -7,7 +7,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 
-from ..models import Group, Post
+from ..models import Group, Post, Comment
 
 
 User = get_user_model()
@@ -29,6 +29,11 @@ class PostsFormTests(TestCase):
             author=cls.author,
             group=cls.group,
             text='Тестовый пост',
+        )
+        cls.comment = Comment.objects.create(
+            text='Тестовый комментарий',
+            author=cls.author,
+            post=cls.post,
         )
 
     @classmethod
@@ -100,3 +105,18 @@ class PostsFormTests(TestCase):
         self.assertEqual(post_2.text, form_data['text'])
         self.assertEqual(post_2.author, self.author)
         self.assertEqual(post_2.group.title, self.group.title)
+
+    def create_comment(self):
+        """Валидная форма создает запись в Comment."""
+        comment_count = Comment.objects.count()
+        form_data = {
+            'text': self.comment.text,
+        }
+        response = self.author_client.post(
+            reverse('all_posts:add_comment', kwargs={'post_id': self.post.pk}),
+            data=form_data,
+            follow=True
+        )
+        comment_1 = response.context['comment'][0]
+        self.assertEqual(Comment.objects.count(), comment_count + 1)
+        self.assertEqual(comment_1.text, form_data['text'])

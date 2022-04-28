@@ -144,25 +144,22 @@ class PostsPagesTests(TestCase):
 
     def test_authorized_follows(self):
         """Авторизованный пользователь может подписываться на других
-         пользователей."""
-        Follow.objects.all().delete()
-        author_follow = self.author_client.get(
+        пользователей."""
+        self.author_client.get(
             reverse('all_posts:profile_follow',
                     kwargs={'username': self.author}))
-        exist = Follow.objects.filter(
-            user=self.user, author=self.author)
-        self.assertFalse(exist, author_follow)
+        self.assertEqual(Follow.objects.all().count(), 1)
 
     def test_authorized_unfollows(self):
         """Авторизованный пользователь может отписываться от других
-         пользователей."""
-        Follow.objects.all().delete()
-        not_author_follow = self.authorized_client.get(
+        пользователей."""
+        self.authorized_client.get(
             reverse('all_posts:profile_follow',
                     kwargs={'username': self.user}))
-        exist = Follow.objects.filter(
-            user=self.user, author=self.author)
-        self.assertFalse(exist, not_author_follow)
+        self.authorized_client.get(
+            reverse('all_posts:profile_unfollow',
+                    kwargs={'username': self.user}))
+        self.assertEqual(Follow.objects.all().count(), 0)
 
     def create_comment(self):
         """Авторизованный пользователь может писать комментарии."""
