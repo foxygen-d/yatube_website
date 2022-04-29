@@ -31,8 +31,8 @@ def profile(request, username):
     following = False
     author = get_object_or_404(User, username=username)
     if request.user.is_authenticated:
-        follows = User.objects.filter(following__user=request.user)
-        following = bool(author in follows)
+        following = Follow.objects.filter(
+            user=request.user, author=author).exists()
     context = {
         'author': author,
         'following': following,
@@ -122,8 +122,6 @@ def follow_index(request):
 @login_required
 def profile_follow(request, username):
     author = get_object_or_404(User, username=username)
-    Follow.objects.filter(author=author,
-                          user=request.user).exists()
     if request.user != author:
         Follow.objects.get_or_create(user=request.user,
                                      author=author)

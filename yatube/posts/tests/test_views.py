@@ -148,18 +148,22 @@ class PostsPagesTests(TestCase):
         self.author_client.get(
             reverse('all_posts:profile_follow',
                     kwargs={'username': self.user}))
-        self.assertEqual(Follow.objects.all().count(), 1)
+        self.assertEqual(Follow.objects.latest('id').author, self.user)
 
     def test_authorized_unfollows(self):
         """Авторизованный пользователь может отписываться от других
         пользователей."""
-        self.authorized_client.get(
+        self.author_client.get(
             reverse('all_posts:profile_follow',
                     kwargs={'username': self.user}))
         self.authorized_client.get(
+            reverse('all_posts:profile_follow',
+                    kwargs={'username': self.author}))
+        self.author_client.get(
             reverse('all_posts:profile_unfollow',
                     kwargs={'username': self.user}))
-        self.assertEqual(Follow.objects.all().count(), 0)
+        self.assertEqual(Follow.objects.all().count(), 1)
+        self.assertNotEqual(Follow.objects.latest('id').author, self.user)
 
     def create_comment(self):
         """Авторизованный пользователь может писать комментарии."""
